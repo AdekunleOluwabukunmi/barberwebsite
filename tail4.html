@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Modern Barber</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <style>
+        /* Base styles from new file */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* UPDATED: Uses bg-white for light, bg-custom-dark for dark */
+            @apply bg-white text-gray-900 dark:bg-custom-dark dark:text-gray-100 transition-colors duration-300;
+            overflow-x: hidden; 
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hide-on-scroll navbar */
+        header {
+            transition: transform 0.3s ease-in-out, background-color 0.5s ease-in-out, border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+        }
+        .navbar-hidden {
+            transform: translateY(-100%);
+        }
+        .navbar-solid {
+            /* UPDATED: Uses bg-white for light, bg-custom-dark for dark */
+            @apply bg-white/80 dark:bg-custom-dark/80 backdrop-blur-md;
+        }
+
+        /* Glowing button animation */
+        .glow-button {
+            animation: glow 2s infinite ease-in-out;
+        }
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 5px #0ea5e9, 0 0 10px #0ea5e9, 0 0 15px #0ea5e9;
+            }
+            50% {
+                box-shadow: 0 0 10px #0ea5e9, 0 0 20px #0ea5e9, 0 0 30px #0ea5e9;
+            }
+        }
+
+        /* Hamburger menu to 'X' transition */
+        .hamburger-line {
+            transition: all 0.3s ease-in-out;
+        }
+        .menu-open .hamburger-line-1 {
+            transform: rotate(45deg) translate(5px, 6px);
+        }
+        .menu-open .hamburger-line-2 {
+            opacity: 0;
+        }
+        .menu-open .hamburger-line-3 {
+            transform: rotate(-45deg) translate(5px, -6px);
+        }
+
+        /* Fade-in-up animation on load */
+        .fade-init {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Add delays for staggered animation */
+        .fade-delay-1 { transition-delay: 0.2s; }
+        .fade-delay-2 { transition-delay: 0.4s; }
+        .fade-delay-3 { transition-delay: 0.6s; }
+        .fade-delay-4 { transition-delay: 0.8s; }
+
+        /* Skeleton Loader */
+        #loader {
+            /* UPDATED: Uses bg-white for light, bg-custom-dark for dark */
+            @apply fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-custom-dark transition-opacity duration-500;
+        }
+        .spinner {
+            @apply w-16 h-16 border-4 border-t-sky-500 border-gray-200 dark:border-gray-700 rounded-full animate-spin;
+        }
+        
+        /* --- STYLES FOR OUR 4 SECTIONS --- */
+        
+        /* Using Poppins font for our main content sections */
+        .full-page-section {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        :root {
+            /* LIGHT MODE VARIABLES (Defaults) */
+            --color-background: #f0f2f5; 
+            --color-surface: #ffffff;    
+            --color-text-primary: #1c1c1c;  
+            --color-text-secondary: #555; 
+            --color-accent: #c5a47e;     
+            --color-price-bg: #e9ecef; 
+            --border-radius-main: 12px;
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark {
+            /* DARK MODE OVERRIDES (UPDATED) */
+            --color-background: #333333;    /* User requested dark bg */
+            --color-surface: #444444;       /* A slightly lighter surface for cards */
+            --color-text-primary: #f3f4f6;  /* Light text (gray-100) */
+            --color-text-secondary: #9ca3af; /* Muted light text (gray-400) */
+            --color-price-bg: #555555;      /* A lighter bg for price tags */
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .full-page-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 60px 20px;
+            box-sizing: border-box;
+            position: relative;
+            background-color: var(--color-background); /* Uses variable */
+            transition: background-color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .grid-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .section-subtitle {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            color: var(--color-text-primary); /* Uses variable */
+            margin-bottom: 20px;
+            line-height: 1.2;
+            transition: color 0.3s;
+        }
+        
+        .section-title.text-center {
+            text-align: center;
+        }
+        
+        .full-page-section p {
+            font-size: 1rem;
+            color: var(--color-text-secondary); /* Uses variable */
+            line-height: 1.7;
+            margin-bottom: 25px;
+            transition: color 0.3s;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--color-accent);
+            color: var(--color-text-primary) !important; /* Text color contrasts with gold */
+            padding: 12px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 500px;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .about-image {
+            background-image: url('pexels-cottonbro-3998429.jpg');
+        }
+
+        #experts {
+            background-color: var(--color-surface); /* Uses variable */
+        }
+        .experts-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 50px auto;
+        }
+        .expert-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        .expert-card {
+            display: grid;
+            grid-template-columns: 1fr 2fr; 
+            gap: 30px;
+            align-items: center;
+            background-color: var(--color-background); /* Uses variable */
+            padding: 30px;
+            border-radius: var(--border-radius-main);
+            transition: background-color 0.3s;
+        }
+        .expert-card.reverse {
+            grid-template-columns: 2fr 1fr;
+        }
+        .expert-image {
+            width: 100%;
+            height: 250px;
+            background-color: #ccc;
+            background-size: cover;
+            background-position: center;
+            box-shadow: var(--shadow-light);
+        }
+        .expert-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: var(--color-text-primary); /* Uses variable */
+            transition: color 0.3s;
+        }
+        .expert-card span {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            display: block;
+            margin-bottom: 15px;
+        }
+        .expert-card p {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        .social-links a {
+            color: var(--color-text-secondary); /* Uses variable */
+            font-size: 1.5rem;
+            margin-right: 15px;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .social-links a:hover {
+            color: var(--color-accent);
+        }
+
+        .price-list-content {
+            background-color: var(--color-surface); /* Uses variable */
+            border-radius: var(--border-radius-main);
+            padding: 40px;
+            box-shadow: var(--shadow-light);
+            transition: background-color 0.3s;
+        }
+        .price-image {
+            background-image: url('pexels-nickoloui-1319460.jpg');
+            height: 600px;
+        }
+        .price-list-content .section-title {
+            font-size: 2.2rem;
+        }
+        .price-list-content .section-intro {
+            font-size: 1rem;
+            font-style: italic;
+            color: var(--color-text-secondary); /* Uses variable */
+            margin-bottom: 30px;
+        }
+        .service-tabs {
+            display: flex;
+            margin-bottom: 25px;
+        }
+        .tab-button {
+            border: none;
+            background: none;
+            padding: 10px 20px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text-secondary); /* Uses variable */
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+        }
+        .tab-button.active {
+            color: var(--color-text-primary); /* Uses variable */
+            border-bottom-color: var(--color-accent);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .service-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .service-menu li {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--color-background); /* Uses variable */
+            transition: border-bottom-color 0.3s;
+        }
+        .service-menu li:last-child {
+            border-bottom: none;
+        }
+        .service-details {
+            display: flex;
+            flex-direction: column;
+            margin-right: 20px;
+        }
+        .service-details span {
+            font-weight: 600;
+            color: var(--color-text-primary); /* Uses variable */
+        }
+        .service-details p {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary); /* Uses variable */
+            line-height: 1.5;
+            margin: 5px 0 0 0;
+            padding: 0;
+        }
+        .service-menu .price {
+            background-color: var(--color-price-bg); /* Uses variable */
+            color: var(--color-text-primary); /* Uses variable */
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        #packages-content .service-menu li {
+            align-items: center;
+        }
+        
+        #contact {
+            background-color: var(--color-surface); /* Uses variable */
+        }
+        .contact-form {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group.span-two {
+            grid-column: span 2;
+        }
+        .contact-form input,
+        .contact-form select,
+        .contact-form textarea {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--color-background); /* Uses variable */
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            color: var(--color-text-primary); /* Uses variable */
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .contact-form select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 1em;
+            padding-right: 40px;
+        }
+        .contact-form textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .contact-form button {
+            background-color: var(--color-text-primary); /* Uses variable */
+            color: var(--color-surface); /* Uses variable */
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .contact-form button:hover {
+            background-color: #333;
+        }
+        .dark .contact-form button:hover {
+            background-color: #555555; /* Darker hover for dark mode button */
+        }
+
+
+        /* --- Responsive Design for our sections --- */
+        @media (max-width: 900px) {
+            .grid-two-col {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .price-list-section {
+                grid-template-areas: "text" "image";
+            }
+            .price-list-content { order: 1; }
+            .price-image { order: 2; height: 300px; }
+            .expert-grid {
+                grid-template-columns: 1fr;
+            }
+            .expert-card,
+            .expert-card.reverse {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .expert-image {
+                height: 300px;
+                margin: 0 auto;
+            }
+            .contact-form {
+                grid-template-columns: 1fr;
+            }
+            .form-group.span-two {
+                grid-column: span 1;
+            }
+        }
+
+    </style>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'media', 
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif']
+                    },
+                    colors: {
+                        primary: {
+                            light: '#38bdf8', 
+                            DEFAULT: '#0ea5e9', 
+                            dark: '#0284c7'
+                        },
+                        gray: {
+                            950: '#030712'
+                        },
+                        // UPDATED: Added custom-dark for #333
+                        'custom-dark': '#333333' 
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="relative">
+
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="main-content" class="fade-init">
+
+        <header id="navbar" class="fixed top-0 left-0 w-full z-50 navbar-solid transition-colors duration-500">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-20">
+                    
+                    <div class="flex-1">
+                        <a href="index.html" class="text-3xl font-black tracking-tighter text-sky-500">LOGO</a>
+                    </div>
+
+                    <div class="hidden md:flex flex-1 justify-center items-center space-x-8">
+                        <a href="index.html" class="font-medium text-gray-700 dark:text-gray-300 hover:text-sky-500 transition-colors">HOME</a>
+                        <a href="tail4.html" class="font-medium text-gray-700 dark:text-gray-300 hover:text-sky-500 transition-colors">ABOUT</a>
+                        <a href="tail2.html" class="font-medium text-gray-700 dark:text-gray-300 hover:text-sky-500 transition-colors">GALLERY</a>
+                    </div>
+
+                    <div class="hidden md:flex flex-1 justify-end items-center space-x-4">
+                        <a href="#" aria-label="Facebook" class="text-gray-500 hover:text-sky-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 13.5H16.5L17.5 9.5H14V7.5C14 6.47 14 5.5 16 5.5H17.5V2.14C17.174 2.097 15.943 2 14.643 2C11.928 2 10 3.657 10 6.7V9.5H7V13.5H10V22H14V13.5Z"/></svg>
+                        </a>
+                        <a href="#" aria-label="Twitter" class="text-gray-500 hover:text-sky-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="Instagram" class="text-gray-500 hover:text-sky-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.148 3.225-1.664 4.771-4.919 4.919-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.646-.07-4.85s.012-3.584.07-4.85C2.16 3.854 3.704 2.309 6.951 2.163c1.266-.057 1.646-.07 4.85-.07zM12 0C8.74 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.74 0 12s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.74 24 12 24s3.667-.014 4.947-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.687.073-4.947s-.014-3.667-.072-4.947C21.727 2.69 19.302.273 14.947.072 13.667.014 13.26 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg>
+                        </a>
+                        <a href="#contact" class="glow-button ml-4 px-6 py-2 bg-sky-500 text-white font-semibold rounded-full shadow-lg hover:bg-sky-600 transition-all duration-300">
+                            Booking
+                        </a>
+                    </div>
+
+                    <div class="md:hidden flex-1 flex justify-end">
+                        <button id="menu-toggle" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-sky-500 focus:outline-none z-50" aria-controls="mobile-menu" aria-expanded="false">
+                            <span class="sr-only">Open main menu</span>
+                            <div class="w-6 h-6 flex flex-col justify-between">
+                                <span class="hamburger-line hamburger-line-1 block w-full h-0.5 bg-current rounded-full"></span>
+                                <span class="hamburger-line hamburger-line-2 block w-full h-0.5 bg-current rounded-full"></span>
+                                <span class="hamburger-line hamburger-line-3 block w-full h-0.5 bg-current rounded-full"></span>
+                            </div>
+                        </button>
+                    </div>
+
+                </div>
+            </nav>
+
+            <div id="mobile-menu" class="md:hidden max-h-0 overflow-y-auto transition-all duration-500 ease-in-out">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200 dark:border-gray-700">
+                    <a href="index.html" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">HOME</a>
+                    <a href="tail4.html" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">ABOUT</a>
+                    <a href="tail2.html" class="mobile-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">GALLERY</a>
+                    
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                    
+                    <a href="#contact" class="mobile-link block w-full text-center px-6 py-2 bg-sky-500 text-white font-semibold rounded-full shadow-lg hover:bg-sky-600 transition-all duration-300">
+                        Booking
+                    </a>
+                    
+                    <div class="flex justify-center items-center space-x-6 pt-4">
+                        <a href="#" aria-label="Facebook" class="text-gray-500 hover:text-sky-500 transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 13.5H16.5L17.5 9.5H14V7.5C14 6.47 14 5.5 16 5.5H17.5V2.14C17.174 2.097 15.943 2 14.643 2C11.928 2 10 3.657 10 6.7V9.5H7V13.5H10V22H14V13.5Z"/></svg>
+                        </a>
+                        <a href="#" aria-label="Twitter" class="text-gray-500 hover:text-sky-500 transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="Instagram" class="text-gray-500 hover:text-sky-500 transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.148 3.225-1.664 4.771-4.919 4.919-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.646-.07-4.85s.012-3.584.07-4.85C2.16 3.854 3.704 2.309 6.951 2.163c1.266-.057 1.646-.07 4.85-.07zM12 0C8.74 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.74 0 12s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.74 24 12 24s3.667-.014 4.947-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.687.073-4.947s-.014-3.667-.072-4.947C21.727 2.69 19.302.273 14.947.072 13.667.014 13.26 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            
+            <section id="home" class="full-page-section pt-32">
+                <div class="container">
+
+                    <div class="mb-12 text-center fade-init">
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
+                            About
+                        </h2>
+                        <div class="w-24 h-1.5 bg-sky-500 mx-auto rounded-full"></div>
+                    </div>
+
+                    <div class="grid-two-col">
+                        <div class="about-image image-placeholder fade-init fade-delay-2">
+                            </div>
+                        <div class="about-text fade-init fade-delay-1">
+                            <p>Welcome to our shop, where tradition meets modern style. We're more than just a barber; we're a community hub dedicated to the craft of exceptional grooming. Step in, relax, and leave looking and feeling your best.</p>
+                            <a href="#experts" class="cta-button">Meet the Team</a>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="experts" class="full-page-section">
+                <div class="container">
+                    <div class="experts-header fade-init">
+                        <h2 class="section-title">Meet Our Experts</h2>
+                        <p class="section-intro">We're home to the best stylists in town. See for yourself and book us! We are passionate about our craft and dedicated to making you look sharp.</p>
+                    </div>
+                    <div class="expert-grid">
+                        <div class="expert-card">
+                            <div class="expert-image fade-init fade-delay-2" style="background-image: url('pexels-andre-ricardo-modesto-1842027-3423308.jpg')"></div>
+                            <div class="expert-info fade-init fade-delay-1">
+                                <h3>Sam Tommy</h3>
+                                <span>Senior Stylist</span>
+                                <p>Sam Tommy has been working for over 10 years, mastering both classic cuts and modern styles. He's our go-to for transformations and precision fade work.</p>
+                                <div class="social-links">
+                                    <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                                    <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="expert-card reverse">
+                            <div class="expert-info fade-init fade-delay-1">
+                                <h3>Sarah Smith</h3>
+                                <span>Barber & Beard Specialist</span>
+                                <p>Sarah Smith is our specialist in beard shaping, hot towel shaves, and traditional barbering. Her attention to detail is second to none.</p>
+                                <div class="social-links">
+                                    <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                                    <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                                </div>
+                            </div>
+                            <div class="expert-image fade-init fade-delay-2" style="background-image: url('istockphoto-1365608023-1024x1024.jpg')"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pricing" class="full-page-section">
+                <div class="container grid-two-col price-list-section">
+                    <div class="price-image image-placeholder fade-init fade-delay-2" style="background-image: url('pexels-cottonbro-3993293.jpg')">
+                    </div>
+                    <div class="price-list-content fade-init fade-delay-1">
+                        <a href=""></a><h2 class="section-title">Check Out Our Price List!</h2>
+                        <p class="section-intro">All haircuts come with a free drink and hot towel neck shave.</p>
+                        <div class="service-tabs">
+                            <button id="services-tab-btn" class="tab-button active">Services</button>
+                            <button id="packages-tab-btn" class="tab-button">Packages</button>
+                        </div>
+                        <div class="tab-content-container">
+                            <div id="services-content" class="tab-content active">
+                                <ul class="service-menu">
+                                    <li>
+                                        <div class="service-details">
+                                            <span>Haircut & Consultation</span>
+                                            <p>A consultation, wash & haircut from your requested barber. Styled and finished with your recommended product.</p>
+                                        </div>
+                                        <span class="price">£34</span>
+                                    </li>
+                                    <li>
+                                        <div class="service-details">
+                                            <span>Buzz Cut</span>
+                                            <p>A Haircut using only clippers and cut down to precision.</p>
+                                        </div>
+                                        <span class="price">£22</span>
+                                    </li>
+                                    <li>
+                                        <div class="service-details">
+                                            <span>Back and Sides</span>
+                                            <p>For this service we will cut the back and sides of your hair for those in between haircuts...</p>
+                                        </div>
+                                        <span class="price">£22</span>
+                                    </li>
+                                    <li>
+                                        <div class="service-details">
+                                            <span>Wash and Style</span>
+                                            <p>Not ready for a haircut but want to have your hair looking slick for an event...</p>
+                                        </div>
+                                        <span class="price">£14</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="packages-content" class="tab-content">
+                                <ul class="service-menu">
+                                    <li>
+                                        <div class="service-details">
+                                            <span>HAIRCUT + BEARD TRIM</span>
+                                        </div>
+                                        <span class="price">£50</span>
+                                    </li>
+                                    <li>
+                                        <div class="service-details">
+                                            <span>BUZZ CUT OR BACK & SIDES + BEARD TRIM</span>
+                                        </div>
+                                        <span class="price">£40</span>
+                                    </li>
+                                    <li>
+                                        <div class="service-details">
+                                            <span>HAIRCUT + BEARD TRIM + SHAVE</span>
+                                        </div>
+                                        <span class="price">£62</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="contact" class="full-page-section">
+                <div class="container">
+                    <h2 class="section-title text-center fade-init"> Get In Touch</h2>
+                    <form class="contact-form fade-init fade-delay-1">
+                        <div class="form-group">
+                            <input type="text" id="name" name="name" placeholder="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" name="email" placeholder="Email *" required>
+                        </div>
+                        <div class="form-group">
+                            <select id="subject" name="subject" required>
+                                <option value="Query" selected>Query</option>
+                                <option value="Suggestion">Suggestion</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="phone" name="phone" placeholder="Phone number">
+                        </div>
+                        <div class="form-group span-two">
+                            <textarea id="comment" name="comment" placeholder="Comment"></textarea>
+                        </div>
+                        <div class="form-group span-two">
+                            <button type="submit">SEND</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer class="bg-black text-gray-400 py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+                
+                <div>
+                    <h4 class="text-2xl font-black tracking-tighter text-white mb-4">LOGO</h4>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="#" class="hover:text-white transition-colors">Facebook</a>
+                        <a href="#" class="hover:text-white transition-colors">Instagram</a>
+                    </div>
+                    <p class="text-sm">© 2025, TR</p>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-white uppercase tracking-wider mb-4">Say Hello</h4>
+                    <ul class="space-y-2">
+                        <li><a href="tel:+1412560000" class="hover:text-white transition-colors">Phone: 412.56...</a></li>
+                        <li><a href="mailto:6w@gmail.com" class="hover:text-white transition-colors">Email: 6w@gmail.com</a></li>
+                        <li class="flex space-x-4 pt-2">
+                            <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 13.5H16.5L17.5 9.5H14V7.5C14 6.47 14 5.5 16 5.5H17.5V2.14C17.174 2.097 15.943 2 14.643 2C11.928 2 10 3.657 10 6.7V9.5H7V13.5H10V22H14V13.5Z"/></svg>
+                            </a>
+                            <a href="#" aria-label="Twitter" class="text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            </a>
+                            <a href="#" aria-label="Instagram" class="text-gray-500 hover:text-sky-500 transition-colors">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.148 3.225-1.664 4.771-4.919 4.919-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.646-.07-4.85s.012-3.584.07-4.85C2.16 3.854 3.704 2.309 6.951 2.163c1.266-.057 1.646-.07 4.85-.07zM12 0C8.74 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.74 0 12s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.74 24 12 24s3.667-.014 4.947-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.687.073-4.947s-.014-3.667-.072-4.947C21.727 2.69 19.302.273 14.947.072 13.667.014 13.26 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"/></svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-white uppercase tracking-wider mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#contact" class="hover:text-white transition-colors">Support</a></li>
+                        <li><a href="#pricing" class="hover:text-white transition-colors">Services</a></li>
+                        <li><a href="tail4.html" class="hover:text-white transition-colors">About Us</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </footer>
+
+    </div> 
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- Loader & Fade-in Animation ---
+            const loader = document.getElementById('loader');
+            const mainContent = document.getElementById('main-content');
+            const fadeElements = document.querySelectorAll('.fade-init');
+
+            window.addEventListener('load', () => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500); 
+                
+                mainContent.classList.remove('fade-init');
+
+                let baseDelay = 100;
+                setTimeout(() => {
+                    fadeElements.forEach((el) => {
+                        new IntersectionObserver((entries, observer) => {
+                            entries.forEach(entry => {
+                                if(entry.isIntersecting) {
+                                    entry.target.classList.add('fade-in-up');
+                                    observer.unobserve(entry.target);
+                                }
+                            });
+                        }, { threshold: 0.1 }).observe(el);
+                    });
+                }, baseDelay);
+            });
+
+            // --- Navbar Logic (Hide on Scroll & Blend) ---
+            const navbar = document.getElementById('navbar');
+            let lastScrollY = window.scrollY;
+            
+            const manageNavbar = () => {
+                const scrollY = window.scrollY;
+                
+                if (scrollY > lastScrollY && scrollY > 100) {
+                    navbar.classList.add('navbar-hidden');
+                } else {
+                    navbar.classList.remove('navbar-hidden');
+                }
+                lastScrollY = scrollY;
+                
+                if (scrollY > 50) {
+                    navbar.classList.add('navbar-solid');
+                } else {
+                    navbar.classList.remove('navbar-solid');
+                }
+            };
+
+            const blendTimeout = setTimeout(() => {
+                if (window.scrollY < 50) {
+                    navbar.classList.remove('navbar-solid');
+                }
+            }, 3000); 
+
+            window.addEventListener('scroll', () => {
+                clearTimeout(blendTimeout); 
+                manageNavbar();
+            });
+
+            // --- Mobile Menu Toggle ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = mobileMenu.querySelectorAll('.mobile-link');
+            const mobileMenuContainer = document.getElementById('mobile-menu');
+
+            menuToggle.addEventListener('click', () => {
+                const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+                menuToggle.setAttribute('aria-expanded', !isExpanded);
+                menuToggle.classList.toggle('menu-open');
+                
+                if (!isExpanded) {
+                    navbar.classList.add('navbar-solid');
+                    mobileMenu.classList.remove('hidden');
+                    void mobileMenu.offsetWidth; 
+                    mobileMenu.style.maxHeight = '80vh';
+                } else {
+                    mobileMenu.style.maxHeight = '0px';
+                    if(window.scrollY < 50) {
+                        navbar.classList.remove('navbar-solid');
+                    }
+                }
+            });
+
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                    menuToggle.classList.remove('menu-open');
+                    mobileMenu.style.maxHeight = '0px';
+                    if(window.scrollY < 50) {
+                        navbar.classList.remove('navbar-solid');
+                    }
+                });
+            });
+
+            // --- Price List Tab Functionality (MERGED) ---
+            const servicesTabBtn = document.getElementById('services-tab-btn');
+            const packagesTabBtn = document.getElementById('packages-tab-btn');
+            const servicesContent = document.getElementById('services-content');
+            const packagesContent = document.getElementById('packages-content');
+
+            if (servicesTabBtn && packagesTabBtn && servicesContent && packagesContent) {
+                
+                servicesTabBtn.addEventListener('click', () => {
+                    servicesTabBtn.classList.add('active');
+                    packagesTabBtn.classList.remove('active');
+                    servicesContent.classList.add('active');
+                    packagesContent.classList.remove('active');
+                });
+                
+                packagesTabBtn.addEventListener('click', () => {
+                    packagesTabBtn.classList.add('active');
+                    servicesTabBtn.classList.remove('active');
+                    packagesContent.classList.add('active');
+                    servicesContent.classList.remove('active');
+                });
+            }
+
+            // --- Smooth Scroll for all anchor links ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        // Offset for fixed navbar (h-20 = 80px)
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80, 
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+        });
+    </script>
+
+</body>
+</html>
